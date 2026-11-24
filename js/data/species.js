@@ -95,7 +95,7 @@ const MARINE_SPECIES = [
     depth:{type:'target',target:5,tol:4}, oxy:{type:'target',target:6.5,tol:4},
     turb:{type:'target',target:3,tol:5}, mfood:{type:'target',target:8,tol:5,weight:1.8},
     mdist:{type:'target',target:2,tol:4,weight:2.4} } },
-  { id:'seal', name:'점박이물범', latin:'Phoca largha', code:'CE-04', status:'멸종위기 야생생물 II급 · 백령도 서식지 보호', habitat:'marine', cls:'포유류', factors:{
+  { id:'seal', name:'물범', latin:'Phoca largha', code:'CE-04', status:'멸종위기 야생생물 I급(2022 상향) · 백령도 서식지 보호', habitat:'marine', cls:'포유류', factors:{
     wtemp:{type:'range',lo:-2,hi:18,softness:12}, sal:{type:'target',target:30,tol:8},
     depth:{type:'target',target:3,tol:4}, oxy:{type:'target',target:6,tol:4},
     turb:{type:'target',target:5,tol:5}, mfood:{type:'target',target:7,tol:5,weight:1.6},

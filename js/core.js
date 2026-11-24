@@ -30,7 +30,7 @@ function renderDirectory(){
     if(grade!=='all' && r.g!==grade) return false;
     return true;
   });
-  document.getElementById('dir-summary').textContent = `${rows.length}종 표시 중 (전체 ${FULL_SPECIES_LIST.length}종 · 이 중 17종은 적합도 계산 가능)`;
+  document.getElementById('dir-summary').textContent = `${rows.length}종 표시 중 (전체 ${FULL_SPECIES_LIST.length}종 · 이 중 ${Object.keys(MODELED_MAP).length}종은 적합도 계산 가능)`;
   document.getElementById('dir-tbody').innerHTML = rows.length ? rows.map(r=>{
     const modeled = MODELED_MAP[r.n];
     const link = modeled
