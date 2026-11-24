@@ -339,17 +339,49 @@ function switchMode(m){
   if(m !== 'directory') render();
 }
 
+// 계절 재생: 달이 바뀔 때 슬라이더를 다음 값으로 부드럽게 옮긴다 (SEASON_TWEEN_MS 동안 보간)
+const SEASON_STEP_MS = 700;
+const SEASON_TWEEN_MS = 520;
+let seasonTweenRaf = null;
+function seasonEase(t){ return t<0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
+function setSeasonFieldsLive(keys, live){
+  keys.forEach(k=>{
+    const el = document.getElementById(k);
+    el.step = live ? 'any' : '1';
+    el.closest('.field').classList.toggle('season-live', live);
+  });
+}
+function cancelSeasonTween(){
+  if(seasonTweenRaf){ cancelAnimationFrame(seasonTweenRaf); seasonTweenRaf = null; }
+}
 function stepSeason(){
   const curve = SEASON_CURVES[currentHabitat];
-  if(currentHabitat==='land'){
-    document.getElementById('temp').value = curve.temp[seasonMonth];
-    document.getElementById('hum').value = curve.hum[seasonMonth];
-  } else {
-    document.getElementById('wtemp').value = curve.wtemp[seasonMonth];
-  }
+  const keys = Object.keys(curve);
+  const targets = {};
+  keys.forEach(k=>{ targets[k] = curve[k][seasonMonth]; });
   document.getElementById('season-label').textContent = (seasonMonth+1) + '월';
-  render();
   seasonMonth = (seasonMonth+1) % 12;
+
+  cancelSeasonTween();
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){
+    keys.forEach(k=>{ document.getElementById(k).value = targets[k]; });
+    render();
+    return;
+  }
+  setSeasonFieldsLive(keys, true);
+  const from = {};
+  keys.forEach(k=>{ from[k] = Number(document.getElementById(k).value); });
+  const start = performance.now();
+  const frame = now=>{
+    const t = Math.min(1, (now - start) / SEASON_TWEEN_MS);
+    const e = seasonEase(t);
+    keys.forEach(k=>{ document.getElementById(k).value = from[k] + (targets[k] - from[k]) * e; });
+    render();
+    if(t < 1){ seasonTweenRaf = requestAnimationFrame(frame); }
+    else { seasonTweenRaf = null; keys.forEach(k=>{ document.getElementById(k).value = targets[k]; }); }
+  };
+  seasonTweenRaf = requestAnimationFrame(frame);
 }
 const ICON_CALENDAR = '<svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3.3" width="12" height="10.7" rx="1.2"/><path d="M2 6.3h12M5.3 2v2.6M10.7 2v2.6"/></svg>';
 const ICON_PAUSE = '<svg class="btn-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="3.5" y="2.5" width="3" height="11" rx="0.8"/><rect x="9.5" y="2.5" width="3" height="11" rx="0.8"/></svg>';
@@ -358,12 +390,21 @@ function toggleSeason(){
   document.getElementById('season-btn').innerHTML = ICON_PAUSE + '재생 중지';
   seasonMonth = 0;
   stepSeason();
-  seasonTimer = setInterval(stepSeason, 700);
+  seasonTimer = setInterval(stepSeason, SEASON_STEP_MS);
 }
 function stopSeason(){
+  const wasPlaying = !!seasonTimer;
   if(seasonTimer){ clearInterval(seasonTimer); seasonTimer = null; }
+  cancelSeasonTween();
+  // 보간 중에 멈추면 소수 값이 남으므로 정수로 맞추고 step을 되돌린다
+  Object.values(SEASON_CURVES).forEach(curve=>{
+    const keys = Object.keys(curve);
+    keys.forEach(k=>{ const el = document.getElementById(k); el.value = Math.round(Number(el.value)); });
+    setSeasonFieldsLive(keys, false);
+  });
   document.getElementById('season-btn').innerHTML = ICON_CALENDAR + '계절 재생';
   document.getElementById('season-label').textContent = '';
+  if(wasPlaying) render();
 }
 
 // ---- 스크롤 시 상단 고정 바 ----
