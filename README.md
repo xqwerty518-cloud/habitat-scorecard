@@ -16,9 +16,10 @@ js/data/species.js    종 데이터, 282종 목록
 js/core.js            점수 계산, 카드·비교·공존·목록
 js/twin.js            3D 디지털 트윈
 js/app.js             렌더링, 테마, 공유, PDF, 초기화
+tests/check-syntax.mjs  JS 문법 검사
 tests/smoke.mjs       헤드리스 브라우저 스모크 테스트
 CLAUDE.md             Claude Code용 프로젝트 규칙
-.claude/skills/       Claude Code 스킬 (add-species, check-site, deploy)
+.claude/skills/       Claude Code 스킬 (목록은 CLAUDE.md)
 ```
 
 ## 시작하기

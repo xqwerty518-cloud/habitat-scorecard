@@ -56,6 +56,13 @@ check(unmatched.length === 0, `전체 종 목록에 없는 이름: ${unmatched.j
 const ids = await page.evaluate(() => [...LAND_SPECIES, ...MARINE_SPECIES].map(sp => sp.id));
 check(new Set(ids).size === ids.length, '종 id가 중복됨');
 
+// index.html에 하드코딩된 종 수 표기가 실제 데이터와 맞는지 (종 추가 후 빠뜨리기 쉬움)
+const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const total = landExpected + marineExpected;
+for (const phrase of [`${total}종 · 2개 생태계`, `육상·담수 ${landExpected}종, 해양 ${marineExpected}종`, `이 중 ${total}종만`]) {
+  check(html.includes(phrase), `index.html의 종 수 표기가 데이터와 다름 (기대: "${phrase}")`);
+}
+
 for (const habitat of ['land', 'marine']) {
   await page.click('#tab-' + habitat);
   await page.waitForTimeout(300);
