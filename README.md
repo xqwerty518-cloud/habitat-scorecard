@@ -18,7 +18,7 @@ js/twin.js            3D 디지털 트윈
 js/app.js             렌더링, 테마, 공유, PDF, 초기화
 tests/smoke.mjs       헤드리스 브라우저 스모크 테스트
 CLAUDE.md             Claude Code용 프로젝트 규칙
-.claude/skills/       Claude Code 스킬 (add-species, verify, deploy)
+.claude/skills/       Claude Code 스킬 (add-species, check-site, deploy)
 ```
 
 ## 시작하기

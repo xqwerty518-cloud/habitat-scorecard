@@ -1,5 +1,5 @@
 ---
-name: verify
+name: check-site
 description: 코드나 스타일을 바꾼 뒤 커밋 전에 사용. 문법 검사, 헤드리스 브라우저 스모크 테스트, 스크린샷 눈 확인까지.
 ---
 

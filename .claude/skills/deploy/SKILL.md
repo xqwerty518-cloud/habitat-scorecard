@@ -9,7 +9,7 @@ GitHub `xqwerty518-cloud/habitat-scorecard`의 `main` 브랜치가 Vercel 프로
 
 ## 순서
 
-1. `verify` 스킬로 검증이 끝났는지 확인. 안 했으면 먼저 한다.
+1. `check-site` 스킬로 검증이 끝났는지 확인. 안 했으면 먼저 한다.
 2. 커밋. 메시지는 무엇을 왜 바꿨는지 한 줄 (영어 또는 한국어).
 3. `git push origin main`
 4. 배포 확인 (1분 이내 완료됨):
