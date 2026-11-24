@@ -142,15 +142,16 @@ function readInputs(){
 
 function updateLabels(inputs){
   if(currentHabitat === 'land'){
-    document.getElementById('v-temp').textContent = inputs.temp + '°C';
-    document.getElementById('v-hum').textContent = inputs.hum + '%';
+    // 계절 재생 중에는 소수 값이 들어오므로 표시만 반올림
+    document.getElementById('v-temp').textContent = Math.round(inputs.temp) + '°C';
+    document.getElementById('v-hum').textContent = Math.round(inputs.hum) + '%';
     document.getElementById('v-water').textContent = inputs.water;
     document.getElementById('v-veg').textContent = inputs.veg;
     document.getElementById('v-food').textContent = inputs.food;
     document.getElementById('v-dist').textContent = inputs.dist;
     document.getElementById('v-elev').textContent = inputs.elev;
   } else {
-    document.getElementById('v-wtemp').textContent = inputs.wtemp + '°C';
+    document.getElementById('v-wtemp').textContent = Math.round(inputs.wtemp) + '°C';
     document.getElementById('v-sal').textContent = inputs.sal + '‰';
     document.getElementById('v-depth').textContent = inputs.depth;
     document.getElementById('v-oxy').textContent = inputs.oxy + 'mg/L';
@@ -234,15 +235,17 @@ function initCards(list){
 }
 
 function animateNumber(el, from, to, duration){
+  // 계절 재생처럼 매 프레임 render()가 불리면 애니메이션이 겹쳐 쌓이므로 이전 것을 취소한다
+  if(el._numRaf){ cancelAnimationFrame(el._numRaf); el._numRaf = null; }
   if(from === to){ el.textContent = to; return; }
   const startTime = performance.now();
   function step(now){
     const p = Math.min(1, (now - startTime) / duration);
     const eased = 1 - Math.pow(1 - p, 3);
     el.textContent = Math.round(from + (to - from) * eased);
-    if(p < 1) requestAnimationFrame(step);
+    el._numRaf = p < 1 ? requestAnimationFrame(step) : null;
   }
-  requestAnimationFrame(step);
+  el._numRaf = requestAnimationFrame(step);
 }
 
 function activeSpecies(){ return currentHabitat === 'land' ? LAND_SPECIES : MARINE_SPECIES; }

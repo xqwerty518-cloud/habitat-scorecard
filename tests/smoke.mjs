@@ -75,6 +75,21 @@ for (const habitat of ['land', 'marine']) {
 check(await page.$$eval('#cards > *', e => e.length) === marineExpected, `해양 카드 수가 ${marineExpected}개가 아님`);
 check(await page.$$eval('#view-directory tr', e => e.length) === fullCount + 1, `전체 종 목록 행 수가 ${fullCount}종이 아님`);
 
+// 계절 재생: 슬라이더가 보간되며 움직이고, 멈추면 정수 값·step 1로 돌아와야 함
+await page.click('#tab-land');
+await page.click('#mode-calc');
+await page.waitForTimeout(200);
+await page.click('#season-btn');
+await page.waitForTimeout(250);
+const midTween = await page.$eval('#temp', el => ({ v: Number(el.value), live: el.closest('.field').classList.contains('season-live') }));
+check(midTween.live, '계절 재생 중 기온 칸 강조가 없음');
+await page.waitForTimeout(1200);
+check((await page.$eval('#season-label', el => el.textContent)).endsWith('월'), '계절 재생 월 표시가 없음');
+await page.screenshot({ path: path.join(SHOTS, 'land-season.png') });
+await page.click('#season-btn');
+const stopped = await page.$eval('#temp', el => ({ v: el.value, step: el.step, live: el.closest('.field').classList.contains('season-live') }));
+check(Number.isInteger(Number(stopped.v)) && stopped.step === '1' && !stopped.live, '계절 재생을 멈춘 뒤 슬라이더가 원래 상태로 돌아오지 않음');
+
 // 다크 모드
 await page.emulateMedia({ colorScheme: 'dark' });
 await page.click('#tab-land');
