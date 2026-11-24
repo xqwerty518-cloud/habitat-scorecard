@@ -445,7 +445,7 @@ function updateTwin(inputs){
   if(filterWrap.dataset.habitat !== currentHabitat){
     const classes = [...new Set(activeSpecies().map(sp=>sp.cls))];
     twinClassFilter = new Set(classes);
-    filterWrap.innerHTML = classes.map(c=>`<button class="twin-chip active" data-cls="${c}" onclick="toggleTwinClass('${c}')">${c}</button>`).join('');
+    filterWrap.innerHTML = classes.map(c=>`<button class="twin-chip active" data-cls="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');
     filterWrap.dataset.habitat = currentHabitat;
   }
 
@@ -478,7 +478,7 @@ function updateTwin(inputs){
     const r = results.find(x=>x.sp.id===sp.id);
     const filteredOut = !twinClassFilter.has(sp.cls);
     const dim = filteredOut ? 'opacity:.35' : '';
-    legendHtml += `<div class="twin-legend-item" style="${dim}"><span class="twin-dot" style="background:${barColor(r.total)}"></span><span class="twin-legend-name">${sp.name}</span><span class="twin-legend-score">${r.total}점${filteredOut ? ' · 숨김':''}</span></div>`;
+    legendHtml += `<div class="twin-legend-item" style="${dim}"><span class="twin-dot" style="background:${barColor(r.total)}"></span><span class="twin-legend-name">${escapeHtml(sp.name)}</span><span class="twin-legend-score">${r.total}점${filteredOut ? ' · 숨김':''}</span></div>`;
   });
   legendEl.innerHTML = legendHtml;
 

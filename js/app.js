@@ -68,10 +68,12 @@ function restoreFromHash(){
       ACTIVE_KEYS = state.h === 'land' ? LAND_KEYS : MARINE_KEYS;
     }
     if(state.m === 'calc' || state.m === 'compare' || state.m === 'coexist' || state.m === 'twin' || state.m === 'directory') currentMode = state.m;
-    if(state.v){
-      Object.keys(state.v).forEach(k=>{
-        const el = document.getElementById(k);
-        if(el) el.value = state.v[k];
+    // URL은 누구나 조작할 수 있으므로 현재 서식지의 슬라이더 키와 숫자 값만 받는다
+    // (범위 밖 값은 range input이 min/max로 자른다)
+    if(state.v && typeof state.v === 'object'){
+      ACTIVE_KEYS.forEach(k=>{
+        const n = Number(state.v[k]);
+        if(Number.isFinite(n)) document.getElementById(k).value = n;
       });
     }
   }catch(e){ /* 무시하고 기본값으로 진행 */ }
@@ -375,6 +377,20 @@ window.addEventListener('scroll', ()=>{
 });
 document.getElementById('coexist-a').addEventListener('change', render);
 document.getElementById('coexist-b').addEventListener('change', render);
+
+// 동적으로 그리는 버튼은 onclick 문자열 대신 data- 속성 + 이벤트 위임으로 처리
+document.getElementById('dir-tbody').addEventListener('click', e=>{
+  const btn = e.target.closest('.dir-link');
+  if(btn) jumpToSpecies(btn.dataset.id);
+});
+document.getElementById('compare-table-wrap').addEventListener('click', e=>{
+  const btn = e.target.closest('.site-x');
+  if(btn) removeSite(btn.dataset.id);
+});
+document.getElementById('twin-filters').addEventListener('click', e=>{
+  const btn = e.target.closest('.twin-chip');
+  if(btn) toggleTwinClass(btn.dataset.cls);
+});
 
 // ---- 초기화 ----
 updateThemeIcon();

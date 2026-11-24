@@ -12,7 +12,7 @@ const MODELED_MAP = {};
 function initDirectory(){
   const classes = [...new Set(FULL_SPECIES_LIST.map(r=>r.c))];
   const sel = document.getElementById('dir-class');
-  sel.innerHTML = '<option value="all">전체 분류군</option>' + classes.map(c=>`<option value="${c}">${c}</option>`).join('');
+  sel.innerHTML = '<option value="all">전체 분류군</option>' + classes.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
   ['dir-search','dir-class','dir-grade'].forEach(id=>{
     document.getElementById(id).addEventListener('input', renderDirectory);
     document.getElementById(id).addEventListener('change', renderDirectory);
@@ -34,9 +34,9 @@ function renderDirectory(){
   document.getElementById('dir-tbody').innerHTML = rows.length ? rows.map(r=>{
     const modeled = MODELED_MAP[r.n];
     const link = modeled
-      ? `<button class="dir-link" onclick="jumpToSpecies('${modeled.id}')">적합도 보기 →</button>`
+      ? `<button class="dir-link" data-id="${escapeHtml(modeled.id)}">적합도 보기 →</button>`
       : `<span class="dir-none">–</span>`;
-    return `<tr><td class="sp-cell">${escapeHtml(r.n)}</td><td>${r.c}</td><td><span class="grade-badge grade-${r.g}">${r.g}급</span></td><td>${link}</td></tr>`;
+    return `<tr><td class="sp-cell">${escapeHtml(r.n)}</td><td>${escapeHtml(r.c)}</td><td><span class="grade-badge grade-${escapeHtml(r.g)}">${escapeHtml(r.g)}급</span></td><td>${link}</td></tr>`;
   }).join('') : `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);">검색 결과가 없습니다.</td></tr>`;
 }
 
@@ -195,10 +195,10 @@ function buildCard(sp){
   card.innerHTML = `
     <div class="card-top">
       <div class="tag">
-        <div class="tag-badge">${sp.name.slice(0,1)}</div>
-        <div><div class="tag-name">${sp.name}</div><div class="tag-latin">${sp.latin}</div><div class="tag-status">${sp.status||''}</div></div>
+        <div class="tag-badge">${escapeHtml(sp.name.slice(0,1))}</div>
+        <div><div class="tag-name">${escapeHtml(sp.name)}</div><div class="tag-latin">${escapeHtml(sp.latin)}</div><div class="tag-status">${escapeHtml(sp.status||'')}</div></div>
       </div>
-      <div class="rank">No.· ${sp.code}</div>
+      <div class="rank">No.· ${escapeHtml(sp.code)}</div>
     </div>
     <div class="score-row">
       <span class="score-num">0</span><span class="score-max">/ 100</span><span class="verdict">–</span>
@@ -319,11 +319,11 @@ function renderCompare(){
   }
   let html = '<div class="compare-scroll"><table class="compare-table"><thead><tr><th>종</th>';
   sites.forEach(s=>{
-    html += `<th>${escapeHtml(s.name)}<button class="site-x" onclick="removeSite('${s.id}')" title="삭제">×</button></th>`;
+    html += `<th>${escapeHtml(s.name)}<button class="site-x" data-id="${escapeHtml(s.id)}" title="삭제" aria-label="${escapeHtml(s.name)} 지점 삭제">×</button></th>`;
   });
   html += '</tr></thead><tbody>';
   species.forEach(sp=>{
-    html += `<tr><td class="sp-cell">${sp.name}</td>`;
+    html += `<tr><td class="sp-cell">${escapeHtml(sp.name)}</td>`;
     sites.forEach(s=>{
       const sc = scoreSpecies(sp, s.inputs).total;
       const v = verdict(sc);
@@ -340,7 +340,7 @@ function renderCoexist(inputs){
   const selA = document.getElementById('coexist-a');
   const selB = document.getElementById('coexist-b');
   if(selA.dataset.habitat !== currentHabitat){
-    const opts = species.map(sp=>`<option value="${sp.id}">${sp.name}</option>`).join('');
+    const opts = species.map(sp=>`<option value="${escapeHtml(sp.id)}">${escapeHtml(sp.name)}</option>`).join('');
     selA.innerHTML = opts; selB.innerHTML = opts;
     selA.value = species[0].id;
     selB.value = species[1] ? species[1].id : species[0].id;
@@ -363,9 +363,9 @@ function renderCoexist(inputs){
   document.getElementById('coexist-result').innerHTML = `
     <div class="coexist-card">
       <div class="coexist-pair">
-        <div class="coexist-sp"><span class="tag-name">${spA.name}</span><div class="score-num" style="color:${barColor(rA.total)}">${rA.total}</div></div>
+        <div class="coexist-sp"><span class="tag-name">${escapeHtml(spA.name)}</span><div class="score-num" style="color:${barColor(rA.total)}">${rA.total}</div></div>
         <div class="coexist-x">×</div>
-        <div class="coexist-sp"><span class="tag-name">${spB.name}</span><div class="score-num" style="color:${barColor(rB.total)}">${rB.total}</div></div>
+        <div class="coexist-sp"><span class="tag-name">${escapeHtml(spB.name)}</span><div class="score-num" style="color:${barColor(rB.total)}">${rB.total}</div></div>
       </div>
       <div class="coexist-combined">
         <div class="combined-label">동시 서식 적합도</div>
@@ -373,6 +373,6 @@ function renderCoexist(inputs){
         <div class="combined-verdict">${v.text}</div>
       </div>
       <div class="conflict-title">조건 격차가 가장 큰 요소</div>
-      ${conflicts.map(c=>`<div class="conflict-row"><span>${LABELS[c.key]}</span><span>${spA.name} ${Math.round(rA.perFactor[c.key]*100)}점 · ${spB.name} ${Math.round(rB.perFactor[c.key]*100)}점</span></div>`).join('')}
+      ${conflicts.map(c=>`<div class="conflict-row"><span>${LABELS[c.key]}</span><span>${escapeHtml(spA.name)} ${Math.round(rA.perFactor[c.key]*100)}점 · ${escapeHtml(spB.name)} ${Math.round(rB.perFactor[c.key]*100)}점</span></div>`).join('')}
     </div>`;
 }

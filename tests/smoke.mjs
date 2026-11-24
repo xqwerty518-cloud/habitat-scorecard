@@ -75,6 +75,26 @@ for (const habitat of ['land', 'marine']) {
 check(await page.$$eval('#cards > *', e => e.length) === marineExpected, `해양 카드 수가 ${marineExpected}개가 아님`);
 check(await page.$$eval('#view-directory tr', e => e.length) === fullCount + 1, `전체 종 목록 행 수가 ${fullCount}종이 아님`);
 
+// 이벤트 위임 버튼: 전체 종 목록 "적합도 보기", 디지털 트윈 분류 칩
+await page.click('#mode-directory');
+await page.click('#dir-tbody .dir-link');
+await page.waitForTimeout(300);
+check(await page.$eval('#mode-calc', el => el.classList.contains('active')), '"적합도 보기" 클릭 후 계산기로 이동하지 않음');
+await page.click('#mode-twin');
+await page.waitForTimeout(500);
+await page.click('#twin-filters .twin-chip');
+check(!(await page.$eval('#twin-filters .twin-chip', el => el.classList.contains('active'))), '트윈 분류 칩 클릭이 동작하지 않음');
+await page.click('#twin-filters .twin-chip');
+
+// 조작된 공유 링크: 슬라이더 키만 받고, 다른 요소 값은 바꾸지 않아야 함
+const evil = encodeURIComponent(JSON.stringify({ h:'land', m:'calc', v:{ temp:30, 'site-name-input':'<img src=x onerror=alert(1)>', hum:'abc' } }));
+await page.goto('about:blank'); // 해시만 바뀌면 새로 로드되지 않으므로 페이지를 비웠다가 연다
+await page.goto('http://local/index.html#s=' + evil);
+await page.waitForTimeout(500);
+check(await page.$eval('#temp', el => el.value) === '30', '공유 링크의 슬라이더 값이 복원되지 않음');
+check(await page.$eval('#site-name-input', el => el.value) === '', '공유 링크가 슬라이더가 아닌 요소 값을 바꿈');
+check(await page.$eval('#hum', el => el.value) === '65', '공유 링크의 숫자가 아닌 값이 반영됨');
+
 // 다크 모드
 await page.emulateMedia({ colorScheme: 'dark' });
 await page.click('#tab-land');
